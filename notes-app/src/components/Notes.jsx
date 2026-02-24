@@ -1,14 +1,15 @@
 import "./notes.css";
 import data from "./data";
 import { useState } from "react";
+import { useMemo } from "react";
 const Notes = () => {
   const [notes, setNotes] = useState(data);
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [count, setCount] = useState(3);
 
   function remove(id) {
-    setNotes(notes.filter((e) => e.key != id));
+    setNotes((prev) => prev.filter((e) => e.key !== id));
   }
 
   function handleSubmit() {
@@ -17,16 +18,19 @@ const Notes = () => {
       return;
     }
 
-    setNotes([
-      ...notes,
-      { key: count, title: title, description: description },
-    ]);
+    setNotes((prevNotes) => [...prevNotes, { key: count, title, description }]);
 
     setCount(count + 1);
     setTitle("");
     setDescription("");
     console.log(notes);
   }
+
+  const sorted_notes = useMemo(() => {
+    return [...notes].sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
+    );
+  }, [notes]);
 
   return (
     <div className="container">
@@ -50,8 +54,8 @@ const Notes = () => {
       </div>
 
       <div className="notes">
-        {notes.map((e) => (
-          <div className="note">
+        {sorted_notes.map((e) => (
+          <div className="note" key={e.key}>
             <h4>{e.title}</h4>
             <p>{e.description}</p>
             <button onClick={() => remove(e.key)}>Remove</button>
