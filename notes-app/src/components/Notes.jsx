@@ -1,9 +1,33 @@
 import "./notes.css";
-import data from "./data";
 import { useState } from "react";
 import { useMemo } from "react";
+import { useEffect } from "react";
+const STORAGE_KEY = "notes";
+
 const Notes = () => {
-  const [notes, setNotes] = useState(data);
+  const [notes, setNotes] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+
+      if (saved) return JSON.parse(saved);
+
+      // default example note (first run only)
+      return [
+        {
+          id: Date.now(),
+          title: "Welcome",
+          description: "This is your first note",
+        },
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+  }, [notes]);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [count, setCount] = useState(3);
