@@ -30,24 +30,47 @@ const Notes = () => {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [count, setCount] = useState(3);
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   function remove(id) {
-    setNotes((prev) => prev.filter((e) => e.key !== id));
+    setNotes((prev) => prev.filter((e) => e.id !== id));
   }
 
   function handleSubmit() {
+    if (editingId) {
+      if (!editTitle || !editDescription) {
+        window.alert("Incomplete input");
+        return;
+      }
+
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.id === editingId
+            ? { ...note, title: editTitle, description: editDescription }
+            : note,
+        ),
+      );
+
+      setEditingId(null);
+      return;
+    }
+
     if (!title || !description) {
       window.alert("Incomplete input");
       return;
     }
 
-    setNotes((prevNotes) => [...prevNotes, { key: count, title, description }]);
+    const newNote = {
+      id: Date.now(),
+      title,
+      description,
+    };
 
-    setCount(count + 1);
+    setNotes((prev) => [...prev, newNote]);
     setTitle("");
     setDescription("");
-    console.log(notes);
   }
 
   const sorted_notes = useMemo(() => {
@@ -55,6 +78,12 @@ const Notes = () => {
       a.title.localeCompare(b.title, undefined, { sensitivity: "base" }),
     );
   }, [notes]);
+
+  function startEdit(note) {
+    setEditTitle(note.title);
+    setEditDescription(note.description);
+    setEditingId(note.id);
+  }
 
   return (
     <div className="container">
@@ -79,10 +108,31 @@ const Notes = () => {
 
       <div className="notes">
         {sorted_notes.map((e) => (
-          <div className="note" key={e.key}>
-            <h4>{e.title}</h4>
-            <p>{e.description}</p>
-            <button onClick={() => remove(e.key)}>Remove</button>
+          <div className="note" key={e.id}>
+            {editingId === e.id ? (
+              <>
+                <input
+                  value={editTitle}
+                  onChange={(ev) => setEditTitle(ev.target.value)}
+                />
+
+                <input
+                  value={editDescription}
+                  onChange={(ev) => setEditDescription(ev.target.value)}
+                />
+
+                <button onClick={handleSubmit}>Save</button>
+                <button onClick={() => setEditingId(null)}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <h4>{e.title}</h4>
+                <p>{e.description}</p>
+
+                <button onClick={() => remove(e.id)}>Remove</button>
+                <button onClick={() => startEdit(e)}>Edit</button>
+              </>
+            )}
           </div>
         ))}
       </div>

@@ -1,0 +1,17 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    padding-left: 50px;
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+}
+
+video {
+    width: 500px;
+    height: 500px;
+}
